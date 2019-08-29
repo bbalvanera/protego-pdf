@@ -39,7 +39,7 @@ namespace ProtegoPdf.Service
 
         public int? EncryptionLevel { get; set; }
 
-        public bool? ForceDecryption { get; set; }
+        public bool ForceDecryption { get; set; }
 
         internal byte[] PasswordArray
         {
@@ -96,7 +96,7 @@ namespace ProtegoPdf.Service
                     OwnerPassword   = values.ContainsKey("ownerPassword") ? (string)values["ownerPassword"] : null,
                     Permissions     = values.ContainsKey("permissions") ? (int)values["permissions"] : (int?)null,
                     EncryptionLevel = values.ContainsKey("encryptionLevel") ? (int)values["encryptionLevel"] : (int?)null,
-                    ForceDecryption = values.ContainsKey("forceDecryption") ? (bool?)values["forceDecryption"] : false
+                    ForceDecryption = values.ContainsKey("forceDecryption") ? (bool)values["forceDecryption"] : false
                 };
                 return true;
             }

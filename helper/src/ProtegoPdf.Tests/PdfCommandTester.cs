@@ -487,7 +487,7 @@ namespace ProtegoPdf.Tests
             [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.6.restricted[][test].pdf")]
-            public async Task Should_succeed_When_valid_file(string sourceFile)
+            public async Task Should_succeed_When_valid_password(string sourceFile)
             {
                 var targetFile = $"{sourceFile}.unlocked.pdf";
                 try
@@ -556,18 +556,18 @@ namespace ProtegoPdf.Tests
                 }
             }
 
-            [TestMethod]
+            [DataTestMethod]
             [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.6.restricted[][test].pdf")]
-            public async Task Should_return_BadPassword_When_invalid_password_set(string sourceFile)
+            public async Task Should_return_BadPassword_When_invalid_password(string sourceFile)
             {
                 var request = new PdfOptions
                 {
                     Source = sourceFile,
                     Target = sourceFile,
-                    Password = "any"
+                    Password = "wrong_password"
                 };
                 var subject = GetSubject();
 
@@ -577,9 +577,27 @@ namespace ProtegoPdf.Tests
                 Assert.AreEqual("Bad_Password", result.ErrorType);
             }
 
+            [DataTestMethod]
+            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
+            public async Task Should_return_BadOwnerPassword_When_invalid_owner_password(string sourceFile)
+            {
+                var request = new PdfOptions
+                {
+                    Source = sourceFile,
+                    Target = sourceFile,
+                    Password = "test" // correct user password, incorrect owner password.
+                };
+                var subject = GetSubject();
+
+                var result = await subject.Unlock(request);
+
+                Assert.IsFalse(result.Success);
+                Assert.AreEqual("Bad_Owner_Password", result.ErrorType);
+            }
+
             [TestMethod]
             [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
-            public async Task Should_fail_in_no_owner_password(string sourceFile)
+            public async Task Should_fail_When_no_owner_password(string sourceFile)
             {
                 var request = new PdfOptions
                 {
@@ -593,6 +611,25 @@ namespace ProtegoPdf.Tests
 
                 Assert.IsFalse(result.Success);
                 Assert.AreEqual("Bad_Owner_Password", result.ErrorType);
+            }
+
+            [DataTestMethod]
+            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
+            public async Task Should_fail_When_forced_with_incorrect_password(string sourceFile)
+            {
+                var request = new PdfOptions
+                {
+                    Source = sourceFile,
+                    Target = sourceFile,
+                    Password = "incorrect_user_password",
+                    ForceDecryption = true
+                };
+                var subject = GetSubject();
+
+                var result = await subject.Unlock(request);
+
+                Assert.IsFalse(result.Success);
+                Assert.AreEqual("Bad_Password", result.ErrorType);
             }
 
             [TestMethod]
