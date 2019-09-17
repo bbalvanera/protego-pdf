@@ -19,8 +19,15 @@ app-card(cardTitle="Unlock PDF Document", i18n-cardTitle="section title")
   .card-body.border.border-top-0.border-right-0.border-left-0
     .container.p-0
       app-file-input((protectedStatusChanges)="protectedStatusChanges($event)")
-  .card-body.h-75.pt-3
+  .card-body.h-75
     .container.p-0
+      .row
+        .col-12
+          .alert.alert-warning.mb-1(role="alert", *ngIf="needsToBeForced")
+            .mr-2 I declare that, although I do not have the Owner Password, I have the right to unlock this file
+              .custom-control.custom-switch.d-inline
+                input.custom-control-input(type="checkbox", id="custom-checkbox", [formControl]="forceUnlock", value="false")
+                label.custom-control-label(for="custom-checkbox")
       .row
         .col-9.pr-0
           input.password-input.form-control.form-control-sm(
@@ -34,9 +41,18 @@ app-card(cardTitle="Unlock PDF Document", i18n-cardTitle="section title")
             *ngIf="password.errors?.required && password.dirty",
             i18n="@@pwdRequiredMessage"
           ) Please specify a password
+          .invalid-feedback.pl-2.mb-2(
+            *ngIf="password.errors?.invalidPassword && password.dirty",
+            i18n="@@pwdInvalidPwdMessage"
+          ) The provided password is incorrect. Please verify
+          .invalid-feedback.pl-2.mb-2.d-flex.justify-content-between(
+            *ngIf="password.errors?.invalidOwnerPassword && password.dirty",
+            i18n="@@pwdInvalidOwnerPwdMessage"
+          ) Invalid owner password
+            button.btn.btn-sm.btn-link.text-primary.p-0.b-0(type="button", style="font-size:100%", (click)="needsToBeForced = true", [disabled]="needsToBeForced") I don't know the owner password
         .col-3
-          .btn-group.d-flex
-            button.btn.btn-primary.btn-sm.btn-block(
+          .btn-group.d-flex.btn-block
+            button.btn.btn-primary.btn-sm(
               type="button",
               i18n="action",
               (click)="unlockDocument(1)"
@@ -74,3 +90,18 @@ app-ui-messages
   app-ui-message(
     id="Success_Message",
     i18n="success msg title|Lets the user know that its Pdf file was protected") File unlocked
+  app-ui-message(
+    id="File_Access_Error",
+    title="Could not unlock your file",
+    i18n-title="fileaccess msg title|Lets the user know that the file could not be protected@@couldNotProtect",
+    i18n="fileaccess msg|Lets the user know the file is open in another program") The file is open in another program
+  app-ui-message(
+    id="Insufficient_Permissions",
+    title="Could not unlock your file",
+    i18n-title="@@couldNotProtect"
+    i18n="permissions msg|Lets the user know the file could not be accessed") Access to the file is denied
+  app-ui-message(
+    id="General_Error",
+    title="Could not unlock your file",
+    i18n-title="@@couldNotProtect",
+    i18n="general error msg|Lets the user know there was an unexpected error") An unexpected error has ocurred

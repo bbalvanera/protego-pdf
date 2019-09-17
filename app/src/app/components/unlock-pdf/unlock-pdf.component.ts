@@ -22,11 +22,9 @@ import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs/Subject';
 import { takeUntil } from 'rxjs/operators/takeUntil';
-import { filter } from 'rxjs/operators/filter';
 
 import { FileInputComponent, IFileInput } from '../../shared/components/file-input';
 import { PdfProtectMode } from '../../shared/pdf-protect-mode.enum';
-import { PdfProtectService } from '../../services/pdf-protect.service';
 import { UIMessagesDirective } from '../../shared/directives';
 import { UnlockPdfService } from './unlock-pdf.service';
 import { Logger } from '../../shared/logging/logger';
@@ -45,6 +43,8 @@ export class UnlockPdfComponent implements OnInit {
   private unsubscriber: Subject<void>;
 
   public password: FormControl;
+  public forceUnlock: FormControl;
+  public needsToBeForced: boolean;
 
   constructor(
     private router: Router,
@@ -53,6 +53,8 @@ export class UnlockPdfComponent implements OnInit {
     private zone: NgZone) {
       this.unsubscriber = new Subject();
       this.password = new FormControl('', Validators.required);
+      this.forceUnlock = new FormControl('');
+      this.needsToBeForced = false;
   }
 
   public ngOnInit(): void {
@@ -79,7 +81,7 @@ export class UnlockPdfComponent implements OnInit {
     const fileName = this.fileInput.value;
     const password = this.password.value;
 
-    this.unlockPdfService.unlockFile({ fileName, password, mode })
+    this.unlockPdfService.unlockFile({ fileName, password, mode, force: this.forceUnlock.value || false })
       .subscribe(
         savePath => {
           // use ngZone since this could potentially be called by a different thread (MainProcess thread)
@@ -101,12 +103,14 @@ export class UnlockPdfComponent implements OnInit {
     this.fileInput.ensureValue();
     this.password.markAsDirty();
 
-    return this.fileInput.valid && this.password.valid;
+    return this.fileInput.valid && this.password.valid && (this.needsToBeForced ? this.forceUnlock.value : true);
   }
 
   private reset(): void {
     this.fileInput.reset();
     this.password.reset();
+    this.forceUnlock.reset();
+    this.needsToBeForced = false;
   }
 
   private handlerError(err: { errorType: string, errorDescription?: string }): void {
@@ -120,8 +124,17 @@ export class UnlockPdfComponent implements OnInit {
       case 'Insufficient_Permissions': // fall-through is intentional
         this.showMessage('error', err.errorType);
         break;
+      case 'Bad_Password':
+        this.password.setErrors({ invalidPassword: true });
+        this.password.markAsDirty();
+        break;
+      case 'Bad_Owner_Password':
+        this.password.reset();
+        this.password.setErrors({ invalidOwnerPassword: true });
+        this.password.markAsDirty();
+        break;
       default:
-        Logger.error(`[LockPdf.protectDocument] Error in LockPdfService.protectDocument: ${err.errorDescription}`);
+        Logger.error(`[LockPdf.unlockDocument] Error in UnlockPdfService.unlockDocument: ${err.errorDescription}`);
         this.showMessage('error', 'General_Error');
         break;
     }

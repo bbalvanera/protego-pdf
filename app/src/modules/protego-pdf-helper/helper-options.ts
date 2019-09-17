@@ -23,4 +23,5 @@ export interface HelperOptions extends ProtectionOptions {
   source: string;
   target?: string;
   password?: string;
+  forceDecryption?: boolean;
 }

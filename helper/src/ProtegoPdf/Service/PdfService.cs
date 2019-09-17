@@ -98,12 +98,19 @@ namespace ProtegoPdf.Service
 
         public void Unlock(PdfOptions args)
         {
+            OpenAsPdf(args.Source, args.PasswordArray);
+
             var tempTarget = Path.GetTempFileName();
             var reader = new PdfReader(args.Source, new ReaderProperties().SetPassword(args.PasswordArray));
             var writer = new PdfWriter(tempTarget);
 
             try
             {
+                if (args.ForceDecryption)
+                {
+                    reader.SetUnethicalReading(true);
+                }
+
                 var doc = new PdfDocument(reader, writer);
                 doc.SetCloseReader(true);
                 doc.SetCloseWriter(true);
@@ -123,20 +130,26 @@ namespace ProtegoPdf.Service
 
         private void ForceRead(string fileName)
         {
-            using (var file = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Delete))
+            using (var reader = new PdfReader(fileName))
             {
-                using (var reader = new PdfReader(file))
+                using (var doc = new PdfDocument(reader))
                 {
-                    using (var doc = new PdfDocument(reader))
-                    {
-
-                        if (!reader.IsOpenedWithFullPermission())
-                            throw new BadPasswordException("Bad Password");
-                    }
+                    if (!reader.IsOpenedWithFullPermission())
+                        throw new BadPasswordException("Bad_Password");
                 }
             }
+        }
 
-            GC.Collect();
+        private void OpenAsPdf(string fileName, byte[] password)
+        {
+            using (var reader = new PdfReader(fileName, new ReaderProperties().SetPassword(password)))
+            {
+                using (var doc = new PdfDocument(reader))
+                {
+                    doc.SetCloseReader(true);
+                    doc.GetNumberOfPages();
+                }
+            }
         }
     }
 }

@@ -45,20 +45,19 @@ export class UnlockPdfService extends PdfComponentService {
       super(electronService, storageService, toastrService);
   }
 
-  public unlockFile(args: { fileName: string, password: string, mode: PdfProtectMode }): Observable<string> {
+  public unlockFile(args: { fileName: string, password: string, mode: PdfProtectMode, force: boolean }): Observable<string> {
     const fileInfo = path.parse(args.fileName) as ParsedPath;
 
-    return this.getTargetFileName(fileInfo, args.mode)
+    return this.getTargetFileName(fileInfo, args.mode, 'unlocking')
       .pipe(mergeMap(target => {
         if (!target || target === '') { // if user cancels save-file dialog, an empty file path is returned
           return observableThrow({ errorType: 'Canceled_By_User' });
         }
 
-        const source = args.fileName;
-        const password = args.password;
+        const { fileName: source, password, force } = args;
 
         return this.pdfService
-          .unlock(source, target, password)
+          .unlock(source, target, password, force)
           .pipe(map(_ => target));
       }));
   }

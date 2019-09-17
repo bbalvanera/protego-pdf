@@ -62,7 +62,7 @@ export class LockPdfService extends PdfComponentService {
   public protectFile(args: { fileName: string, password: string, mode: PdfProtectMode }): Observable<string> {
     const fileInfo = path.parse(args.fileName) as ParsedPath;
 
-    return this.getTargetFileName(fileInfo, args.mode)
+    return this.getTargetFileName(fileInfo, args.mode, 'locking')
       .pipe(mergeMap(target => {
         if (!target || target === '') { // if user cancels save-file dialog, an empty file path is returned
           return observableThrow({ errorType: 'Canceled_By_User' });
