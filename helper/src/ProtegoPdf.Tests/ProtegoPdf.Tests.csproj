@@ -98,16 +98,19 @@
     <None Include="TestData\test.v1.5.invalid.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="TestData\test.v1.6.attachement-encrypted.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="TestData\test.v1.6.clear.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\test.v1.6.encrypted[test].pdf">
+    <None Include="TestData\test.v1.6.encrypted[][test].pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="TestData\test.v1.6.restricted[owner][test].pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\test.v1.6.restricted[][test].pdf">
+    <None Include="TestData\test.v1.6.restricted[owner][].pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="TestData\test.v1.6.unknown-owner-password.restricted.pdf">

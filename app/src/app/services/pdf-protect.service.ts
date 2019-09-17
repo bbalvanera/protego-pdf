@@ -40,7 +40,7 @@ export class PdfProtectService {
     return fromPromise<boolean>(protect(source, target, password, options || {}));
   }
 
-  public unlock(source: string, target: string, password: string): Observable<boolean> {
-    return fromPromise<boolean>(unlock(source, target, password));
+  public unlock(source: string, target: string, password: string, force: boolean = false): Observable<boolean> {
+    return fromPromise<boolean>(unlock(source, target, password, force));
   }
 }
