@@ -29,7 +29,7 @@ namespace ProtegoPdf.Tests
         public static PdfCommand GetSubject() => new PdfCommand();
 
         [TestClass]
-        public class When_checking_If_PdfDocument
+        public class When_IsPdfDocument_is_called
         {
 
             [TestMethod]
@@ -37,7 +37,7 @@ namespace ProtegoPdf.Tests
             {
                 var subject = GetSubject();
 
-                var result = await subject.IsPdfDocument(new Service.PdfOptions { Source = "file.pdf" }); // any file works
+                var result = await subject.IsPdfDocument(new PdfOptions { Source = "file.pdf" }); // any file works
 
                 Assert.IsInstanceOfType(result, typeof(OperationResult));
             }
@@ -45,8 +45,13 @@ namespace ProtegoPdf.Tests
             [DataTestMethod]
             [DataRow("TestData/test.v1.2.clear.pdf")]
             [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
-            [DataRow("TestData/test.v1.6.restricted[][test].pdf")]
-            public async Task Should_succeed_When_actual_PDFDocument(string f)
+            [DataRow("TestData/test.v1.3.encrypted[test][test1].pdf")]
+            [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.6.encrypted[][test].pdf")]
+            [DataRow("TestData/test.v1.6.restricted[owner][].pdf")]
+            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
+            public async Task Should_return_Success_If_PDFDocument(string f)
             {
                 var subject = GetSubject();
 
@@ -63,7 +68,7 @@ namespace ProtegoPdf.Tests
             [DataRow("gasdfas;rj")]
             [DataRow("TestData/not-exists.pdf")]
             [DataRow("1")]
-            public async Task Should_return_InvalidArgument_When_invalid_value(string f)
+            public async Task Should_return_InvalidArgument_If_illegal_file_name(string f)
             {
                 var subject = GetSubject();
 
@@ -79,7 +84,7 @@ namespace ProtegoPdf.Tests
             [DataRow("TestData/test.corrupted.pdf")]
             [DataRow("TestData/test.v1.5.corrupted.pdf")]
             [DataRow("TestData/test.v1.5.invalid.pdf")]
-            public async Task Should_succeed_When_invalid_file(string f)
+            public async Task Should_return_Success_If_invalid_file(string f)
             {
                 // if the file is invalid, it should return false to IsPdfDocument
                 // but no exceptions should be thrown
@@ -93,7 +98,7 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_return_FileAccessError_When_blocked_file()
+            public async Task Should_return_FileAccessError_If_file_is_blocked()
             {
                 string f = "TestData/test.v1.5.clear.pdf";
 
@@ -112,7 +117,7 @@ namespace ProtegoPdf.Tests
             [TestMethod]
             [Description("Make this test work by denying all permissions at the OS level for this file")]
             [Ignore]
-            public async Task Should_return_InsufficientPermissions_When_inaccessible_file()
+            public async Task Should_return_InsufficientPermissions_If_file_is_inaccessible()
             {
                 string f = "TestData/test.v1.6.permission.denied.pdf";
 
@@ -126,10 +131,10 @@ namespace ProtegoPdf.Tests
         }
 
         [TestClass]
-        public class When_checking_if_Protected
+        public class When_IsProtected_is_called
         {
             [TestMethod]
-            public async Task Should_return_OperationResult_Type()
+            public async Task Should_return_OperationResult_Type_If_called()
             {
                 var subject = GetSubject();
 
@@ -140,7 +145,14 @@ namespace ProtegoPdf.Tests
 
             [DataTestMethod]
             [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
-            public async Task Should_succeed_When_valid_file(string f)
+            [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.3.encrypted[test][test1].pdf")]
+            [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.6.encrypted[][test].pdf")]
+            [DataRow("TestData/test.v1.6.restricted[owner][].pdf")]
+            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
+            public async Task Should_return_Success_If_file_is_protected(string f)
             {
                 var subject = GetSubject();
 
@@ -158,7 +170,7 @@ namespace ProtegoPdf.Tests
             [DataRow(@"\:text.txt")]
             [DataRow("TestData/not-exists.pdf")]
             [DataRow("1")]
-            public async Task Should_return_InvalidArgument_When_invalid_value(string f)
+            public async Task Should_return_InvalidArgument_If_illegal_file_name(string f)
             {
                 var subject = GetSubject();
 
@@ -172,7 +184,7 @@ namespace ProtegoPdf.Tests
             [DataTestMethod]
             [DataRow("TestData/test.v1.5.corrupted.pdf")]
             [DataRow("TestData/test.v1.5.invalid.pdf")]
-            public async Task Should_return_False_when_invalid_file(string f)
+            public async Task Should_return_False_If_file_is_corrupted_or_not_a_pdf(string f)
             {
                 var subject = GetSubject();
 
@@ -184,7 +196,7 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_return_FileAccessError_When_blocked_file()
+            public async Task Should_return_FileAccessError_If_file_is_blocked()
             {
                 string f = "TestData/test.v1.4.clear.pdf";
                 using (var blocker = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.None))
@@ -202,7 +214,7 @@ namespace ProtegoPdf.Tests
             [TestMethod]
             [Ignore]
             [Description("Make this test work by denying all permissions at the OS level for this file")]
-            public async Task Should_return_InsufficientPermissions_When_inaccessible_file()
+            public async Task Should_return_InsufficientPermissions_If_file_is_inaccessible()
             {
                 string f = "TestData/test.v1.6.permission.denied.pdf";
 
@@ -216,7 +228,7 @@ namespace ProtegoPdf.Tests
         }
 
         [TestClass]
-        public class When_protecting_file
+        public class When_protecting_a_file
         {
             [DataTestMethod]
             [DataRow("TestData/test.v1.2.clear.pdf")]
@@ -225,7 +237,7 @@ namespace ProtegoPdf.Tests
             [DataRow("TestData/test.v1.4.clear.pdf")]
             [DataRow("TestData/test.v1.5.clear.pdf")]
             [DataRow("TestData/test.v1.6.clear.pdf")]
-            public async Task Should_succeed_When_valid_file(string sourceFile)
+            public async Task Should_return_Success_If_valid_file(string sourceFile)
             {
                 var targetFile = $"{sourceFile}.encrypted.pdf";
                 var request = new PdfOptions
@@ -254,7 +266,7 @@ namespace ProtegoPdf.Tests
             [DataRow("TestData/test.v1.4.clear.pdf")]
             [DataRow("TestData/test.v1.5.clear.pdf")]
             [DataRow("TestData/test.v1.6.clear.pdf")]
-            public async Task Should_Protect_When_file_already_exists(string sourceFile)
+            public async Task Should_protect_If_file_is_unprotected(string sourceFile)
             {
                 var targetFile = $"{sourceFile}.encrypted.pdf";
                 try
@@ -287,7 +299,7 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_return_InsufficientPermissions_When_restricted_path()
+            public async Task Should_return_InsufficientPermissions_If_path_is_protected_or_inaccessible()
             {
                 var sourceFile = "TestData/test.v1.2.clear.pdf";
                 var targetFile = "C:\\Program Files\\mytestfile.encrypted.pdf";
@@ -309,7 +321,7 @@ namespace ProtegoPdf.Tests
             [DataTestMethod]
             [DataRow(@"D:\AppDataz\testdata.pdf")]
             [DataRow(@"P:\testdata.pdf")]
-            public async Task Should_return_InvalidArgument_When_invalid_file(string targetFile)
+            public async Task Should_return_InvalidArgument_If_illegal_file_name(string targetFile)
             {
                 var sourceFile = "TestData/test.v1.2.clear.pdf";
 
@@ -331,7 +343,7 @@ namespace ProtegoPdf.Tests
             [DataTestMethod]
             [DataRow(@":\text.txt")]
             [DataRow(@":text.txt")]
-            public async Task Should_return_InvalidArgument_When_illegal_path(string targetFile)
+            public async Task Should_return_InvalidArgument_If_illegal_save_file_name(string targetFile)
             {
                 var sourceFile = "TestData/test.v1.2.clear.pdf";
 
@@ -350,7 +362,7 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_return_FileAccessError_When_blocked_file()
+            public async Task Should_return_FileAccessError_If_file_is_blocked()
             {
                 var sourceFile = "TestData/test.v1.2.clear.pdf";
                 var targetFile = $"{sourceFile}.encrypted.pdf";
@@ -382,20 +394,22 @@ namespace ProtegoPdf.Tests
                 }
             }
 
-            [TestMethod]
+            [DataTestMethod]
             [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.3.encrypted[test][test1].pdf")]
             [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
-            [DataRow("TestData/test.v1.6.encrypted[test].pdf")]
-            public async Task Should_return_BadPassword_When_already_protected(string sourceFile)
+            [DataRow("TestData/test.v1.6.encrypted[][test].pdf")]
+            [DataRow("TestData/test.v1.6.restricted[owner][].pdf")]
+            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
+            public async Task Should_return_BadPassword_If_already_protected(string sourceFile)
             {
                 var targetFile = $"{sourceFile}.encrypted.pdf";
                 var request = new PdfOptions
                 {
                     Source = sourceFile,
                     Target = targetFile,
-                    UserPassword = "hello!"
+                    UserPassword = "badpassword"
                 };
                 var subject = GetSubject();
 
@@ -404,10 +418,16 @@ namespace ProtegoPdf.Tests
                 Assert.AreEqual("Bad_Password", result.ErrorType);
             }
 
-            [TestMethod]
-            public async Task Should_return_BadPassword_when_invalid_password_set()
+            [DataTestMethod]
+            [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.3.encrypted[test][test1].pdf")]
+            [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.6.encrypted[][test].pdf")]
+            [DataRow("TestData/test.v1.6.restricted[owner][].pdf")]
+            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
+            public async Task Should_return_BadPassword_If_invalid_password(string sourceFile)
             {
-                var sourceFile = "TestData/test.v1.5.encrypted[test].pdf";
                 var targetFile = $"{sourceFile}.encrypted.pdf";
                 try
                 {
@@ -433,7 +453,7 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_not_block_file_when_errored()
+            public async Task Should_not_leave_file_blocked_If_errored()
             {
                 var sourceFile = "TestData/test.v1.5.encrypted[test].pdf";
                 var request = new PdfOptions
@@ -461,7 +481,7 @@ namespace ProtegoPdf.Tests
             [TestMethod]
             [Ignore]
             [Description("Make this test work by denying all permissions at the OS level for this file")]
-            public async Task Should_return_InsufficientPermissions_When_inaccessible_file()
+            public async Task Should_return_InsufficientPermissions_If_file_is_inaccessible()
             {
                 string f = "TestData/test.v1.6.permission.denied.pdf";
                 var request = new PdfOptions
@@ -486,8 +506,8 @@ namespace ProtegoPdf.Tests
             [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
             [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
-            [DataRow("TestData/test.v1.6.restricted[][test].pdf")]
-            public async Task Should_succeed_When_valid_file(string sourceFile)
+            [DataRow("TestData/test.v1.6.encrypted[][test].pdf")]
+            public async Task Should_succeed_If_password_is_valid(string sourceFile)
             {
                 var targetFile = $"{sourceFile}.unlocked.pdf";
                 try
@@ -521,8 +541,47 @@ namespace ProtegoPdf.Tests
             }
 
             [DataTestMethod]
+            [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
+            [DataRow("TestData/test.v1.6.encrypted[][test].pdf")]
+            public async Task Should_return_BadPassword_If_invalid_password(string sourceFile)
+            {
+                var request = new PdfOptions
+                {
+                    Source = sourceFile,
+                    Target = sourceFile,
+                    Password = "wrong_password"
+                };
+                var subject = GetSubject();
+
+                var result = await subject.Unlock(request);
+
+                Assert.IsFalse(result.Success);
+                Assert.AreEqual("Bad_Password", result.ErrorType);
+            }
+
+            [DataTestMethod]
             [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
-            public async Task Should_succeed_When_only_user_password_and_forced(string sourceFile)
+            public async Task Should_return_BadOwnerPassword_If_invalid_owner_password(string sourceFile)
+            {
+                var request = new PdfOptions
+                {
+                    Source = sourceFile,
+                    Target = sourceFile,
+                    Password = "test" // correct user password, incorrect owner password.
+                };
+                var subject = GetSubject();
+
+                var result = await subject.Unlock(request);
+
+                Assert.IsFalse(result.Success);
+                Assert.AreEqual("Bad_Owner_Password", result.ErrorType);
+            }
+
+            [DataTestMethod]
+            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
+            public async Task Should_succeed_If_only_userpassword_is_provided_but_forced(string sourceFile)
             {
                 var targetFile = $"{sourceFile}.unlocked.pdf";
                 try
@@ -556,18 +615,16 @@ namespace ProtegoPdf.Tests
                 }
             }
 
-            [TestMethod]
-            [DataRow("TestData/test.v1.2.encrypted[test].pdf")]
-            [DataRow("TestData/test.v1.4.encrypted[test].pdf")]
-            [DataRow("TestData/test.v1.5.encrypted[test].pdf")]
-            [DataRow("TestData/test.v1.6.restricted[][test].pdf")]
-            public async Task Should_return_BadPassword_When_invalid_password_set(string sourceFile)
+            [DataTestMethod]
+            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
+            public async Task Should_return_BadPassword_If_invalid_password_even_if_forced(string sourceFile)
             {
                 var request = new PdfOptions
                 {
                     Source = sourceFile,
                     Target = sourceFile,
-                    Password = "any"
+                    Password = "incorrect_user_password",
+                    ForceDecryption = true
                 };
                 var subject = GetSubject();
 
@@ -578,27 +635,9 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            [DataRow("TestData/test.v1.6.restricted[owner][test].pdf")]
-            public async Task Should_fail_in_no_owner_password(string sourceFile)
-            {
-                var request = new PdfOptions
-                {
-                    Source = sourceFile,
-                    Target = sourceFile,
-                    Password = "test" // using user password instead of owner password
-                };
-                var subject = GetSubject();
-
-                var result = await subject.Unlock(request);
-
-                Assert.IsFalse(result.Success);
-                Assert.AreEqual("Bad_Owner_Password", result.ErrorType);
-            }
-
-            [TestMethod]
             [DataRow("TestData/invalid.pdf")]
             [DataRow("TestData/test.corrupted.pdf")]
-            public async Task Should_return_InvalidArgument_When_invalid_file(string sourceFile)
+            public async Task Should_return_InvalidArgument_If_invalid_file(string sourceFile)
             {
                 var request = new PdfOptions
                 {
@@ -615,7 +654,7 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_not_block_file_When_errored()
+            public async Task Should_not_leave_file_blocked_If_errored()
             {
                 var sourceFile = "TestData/test.v1.5.encrypted[test].pdf";
                 var request = new PdfOptions
@@ -645,7 +684,7 @@ namespace ProtegoPdf.Tests
             [DataRow("TestData/test.v1.4.clear.pdf")]
             [DataRow("TestData/test.v1.5.clear.pdf")]
             [DataRow("TestData/test.v1.6.clear.pdf")]
-            public async Task Should_succeed_When_not_protected(string sourceFile)
+            public async Task Should_succeed_If_not_protected(string sourceFile)
             {
                 var request = new PdfOptions
                 {
@@ -662,9 +701,9 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_return_GeneralError_When_unable_to_read_file()
+            public async Task Should_return_GeneralError_If_unable_to_read_file()
             {
-                var sourceFile = "TestData/test.v1.6.encrypted[test].pdf"; // this file is corrupted or simply, iText can't read from it when other pdf reader can.
+                var sourceFile = "TestData/test.v1.6.attachement-encrypted.pdf"; // this file is corrupted or simply, iText can't read from it when other pdf readers can.
                 var request = new PdfOptions
                 {
                     Source = sourceFile,
@@ -680,7 +719,7 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_return_InsufficientPermissions_When_inaccessible_path()
+            public async Task Should_return_InsufficientPermissions_If_path_is_inaccessible()
             {
                 var sourceFile = "TestData/test.v1.2.clear.pdf";
                 var targetFile = "C:\\Program Files\\mytestfile.encrypted.pdf";
@@ -700,7 +739,7 @@ namespace ProtegoPdf.Tests
             }
 
             [TestMethod]
-            public async Task Should_return_FileAccessError_When_blocked_file()
+            public async Task Should_return_FileAccessError_If_file_is_blocked()
             {
                 var sourceFile = "TestData/test.v1.5.encrypted[test].pdf";
                 var request = new PdfOptions

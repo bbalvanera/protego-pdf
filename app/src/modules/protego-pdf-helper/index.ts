@@ -61,11 +61,12 @@ export function protect(
   return Proxy.executeCall('Protect', options);
 }
 
-export function unlock(source: string, target: string, password: string): Promise<boolean> {
+export function unlock(source: string, target: string, password: string, force: boolean): Promise<boolean> {
   const options = {
     source,
     target,
     password,
+    forceDecryption: force,
   };
 
   return Proxy.executeCall('Unlock', options);

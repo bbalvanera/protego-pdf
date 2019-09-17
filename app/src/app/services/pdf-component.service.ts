@@ -56,7 +56,7 @@ export class PdfComponentService {
     this.toastrService.error(message, title);
   }
 
-  protected getTargetFileName(fileInfo: ParsedPath, mode: PdfProtectMode): Observable<string> {
+  protected getTargetFileName(fileInfo: ParsedPath, mode: PdfProtectMode, action: 'locking' | 'unlocking'): Observable<string> {
     let retVal: Observable<string>;
 
     switch (mode) {
@@ -64,7 +64,7 @@ export class PdfComponentService {
         retVal = observableOf(path.join(fileInfo.dir, fileInfo.base));
         break;
       case PdfProtectMode.saveNew:
-        const newFile = this.getUnusedFilename(fileInfo);
+        const newFile = this.getUnusedFilename(fileInfo, action);
 
         retVal = observableOf(newFile);
         break;
@@ -76,8 +76,9 @@ export class PdfComponentService {
     return retVal;
   }
 
-  private getUnusedFilename(fileInfo: ParsedPath): string {
-    let fileName = `${fileInfo.name}.locked${fileInfo.ext}`;
+  private getUnusedFilename(fileInfo: ParsedPath, action: 'locking' | 'unlocking'): string {
+    const fileSuffix = action === 'locking' ? 'locked' : 'unlocked';
+    let fileName = `${fileInfo.name}.${fileSuffix}${fileInfo.ext}`;
     let unusedFile = path.join(fileInfo.dir, fileName);
     let count = 1;
 
@@ -86,7 +87,7 @@ export class PdfComponentService {
     }
 
     do {
-      fileName = `${fileInfo.name}.locked (${count})${fileInfo.ext}`;
+      fileName = `${fileInfo.name}.${fileSuffix} (${count})${fileInfo.ext}`;
       unusedFile = path.join(fileInfo.dir, fileName);
       count++;
     } while (fs.existsSync(unusedFile));
